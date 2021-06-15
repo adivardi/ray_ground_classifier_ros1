@@ -1,0 +1,8 @@
+<launch>
+  <node pkg="ray_ground_classifier_nodes" name="ray_ground_classifier_nodes" type="ray_ground_classifier_nodes">
+    <remap from="points_in" to="/sensors/lidar/front_mid/point_cloud"/>
+    <remap from="points_nonground" to="/sensors/lidar/front_mid/point_cloud_autoware_removal"/>
+    <!-- <remap from="points_in" to="/sensors/lidar/front_mid/point_cloud_no_ground"/> -->
+  </node>
+
+</launch>
