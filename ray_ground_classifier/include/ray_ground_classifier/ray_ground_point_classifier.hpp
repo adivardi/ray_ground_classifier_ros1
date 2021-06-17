@@ -182,7 +182,7 @@ public:
     /// \brief Last point was nonground. This one is maybe ground. Label is
     /// solidified if terminal or next label is ground, otherwise nonground
     PROVISIONAL_GROUND = -1,
-    /// \brief point is so vertical wrt last that last point is also nonground
+    /// \brief point is so vertical wrt last point. that last point is also nonground
     RETRO_NONGROUND = 2,
     /// \brief last was provisional ground, but this point is distant
     NONLOCAL_NONGROUND = 3

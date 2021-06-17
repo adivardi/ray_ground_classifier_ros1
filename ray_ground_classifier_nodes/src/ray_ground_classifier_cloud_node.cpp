@@ -69,7 +69,7 @@ RayGroundClassifierCloudNode::RayGroundClassifierCloudNode(ros::NodeHandle& nh)
           5.7, // max_global_slope_deg Maximum permissible slope from base footprint of sensor
           70.0, // nonground_retro_thresh_deg How steep consecutive points need to be to retroactively annotate a point as nonground
           0.05, // min_height_thresh_m Local height threshold can be no less than this
-          1.45, // max_global_height_thresh_m Global height threshold can be no more than this
+          1.45, // max_global_height_thresh_m height threshold can be no more than this for both global and local cone
           1.6, // max_last_local_ground_thresh_m Saturation threshold for locality wrt last ground point (for classifying as ground from nonground)
           5.0// max_provisional_ground_distance_m Max radial distance until provisional ground is not influenced by next points
         }),
@@ -90,7 +90,7 @@ RayGroundClassifierCloudNode::RayGroundClassifierCloudNode(ros::NodeHandle& nh)
         }),
 
   m_pcl_size(28800), //pcl_size
-  m_frame_id("front_mid"),
+  m_frame_id("base_link"),
   m_has_failed(false),
   m_timeout(110), //cloud_timeout_ms
   m_ground_pc_idx{0},
@@ -130,7 +130,7 @@ RayGroundClassifierCloudNode::callback(const pcl::PointCloud<pcl::PointXYZI>::Co
   const ray_ground_classifier::PointXYZIFR eos_pt{&pt_tmp};
 
   // transform to m_frame_id
-  if (msg->header.frame_id != m_frame_id)
+  if (input->header.frame_id != m_frame_id)
   {
     try
     {
