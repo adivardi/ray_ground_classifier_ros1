@@ -101,7 +101,7 @@ RayGroundClassifierCloudNode::RayGroundClassifierCloudNode(ros::NodeHandle& nh)
   init_pcl_msg(m_ground_msg, m_frame_id.c_str(), m_pcl_size);
   init_pcl_msg(m_nonground_msg, m_frame_id.c_str(), m_pcl_size);
 
- m_raw_sub_ptr = nh.subscribe("points_in", 10, &RayGroundClassifierCloudNode::callback, this);
+ m_raw_sub_ptr = nh.subscribe("points_in", 1, &RayGroundClassifierCloudNode::callback, this);
 
   // m_raw_sub_ptr(create_subscription<PointCloud2>(
   //     "points_in",
@@ -120,8 +120,11 @@ RayGroundClassifierCloudNode::RayGroundClassifierCloudNode(ros::NodeHandle& nh)
 
 ////////////////////////////////////////////////////////////////////////////////
 void
-RayGroundClassifierCloudNode::callback(const sensor_msgs::PointCloud2::Ptr& msg)
+RayGroundClassifierCloudNode::callback(const pcl::PointCloud<pcl::PointXYZI>::ConstPtr& msg)
 {
+  pcl::PointCloud<pcl::PointXYZI>::Ptr input(new pcl::PointCloud<pcl::PointXYZI>());
+  pcl::copyPointCloud(*msg, *input);
+
   PointXYZIF pt_tmp;
   pt_tmp.id = static_cast<uint16_t>(PointXYZIF::END_OF_SCAN_ID);
   const ray_ground_classifier::PointXYZIFR eos_pt{&pt_tmp};
@@ -133,12 +136,13 @@ RayGroundClassifierCloudNode::callback(const sensor_msgs::PointCloud2::Ptr& msg)
     {
       constexpr double transform_wait_time {0.2};
       geometry_msgs::TransformStamped transform = tf_buffer_.lookupTransform(
-          m_frame_id, msg->header.frame_id , msg->header.stamp, ros::Duration{transform_wait_time});
+          m_frame_id, input->header.frame_id , pcl_conversions::fromPCL(input->header).stamp, ros::Duration{transform_wait_time});
 
-      Eigen::Matrix4f eigen_transform;
-      pcl_ros::transformAsMatrix(transform.transform, eigen_transform);
-      pcl_ros::transformPointCloud(eigen_transform, *msg, *msg);
-      msg->header.frame_id = m_frame_id;
+      // Eigen::Matrix4f eigen_transform;
+      // pcl_ros::transformAsMatrix(transform.transform, eigen_transform);
+      // pcl_ros::transformPointCloud(eigen_transform, *msg, *msg);
+      pcl_ros::transformPointCloud<pcl::PointXYZI>(*input, *input, transform.transform);
+      input->header.frame_id = m_frame_id;
     }
     catch (tf2::TransformException& ex)
     {
@@ -151,25 +155,25 @@ RayGroundClassifierCloudNode::callback(const sensor_msgs::PointCloud2::Ptr& msg)
     // Reset messages and aggregator to ensure they are in a good state
     reset();
     // Verify header
-    if (msg->header.frame_id != m_ground_msg.header.frame_id) {
+    if (input->header.frame_id != m_ground_msg.header.frame_id) {
       throw std::runtime_error(
               "RayGroundClassifierCloudNode: raw topic from unexpected "
               "frame (expected '" + m_ground_msg.header.frame_id +
               "', got '" + msg->header.frame_id + "')");
     }
     // Verify the consistency of PointCloud msg
-    const auto data_length = msg->width * msg->height * msg->point_step;
-    if ((msg->data.size() != msg->row_step) || (data_length != msg->row_step)) {
-      throw std::runtime_error("RayGroundClassifierCloudNode: Malformed PointCloud2");
-    }
+    // const auto data_length = input->width * input->height * input->point_step;
+    // if ((input->data.size() != input->row_step) || (data_length != input->row_step)) {
+    //   throw std::runtime_error("RayGroundClassifierCloudNode: Malformed PointCloud2");
+    // }
     // Verify the point cloud format and assign correct point_step
-    if (!has_intensity_and_throw_if_no_xyz(msg)) {
-      ROS_WARN_STREAM(
-        "RayGroundClassifierNode Warning: PointCloud doesn't have intensity field");
-    }
+    // if (!has_intensity_and_throw_if_no_xyz(msg)) {
+    //   ROS_WARN_STREAM(
+    //     "RayGroundClassifierNode Warning: PointCloud doesn't have intensity field");
+    // }
     // Harvest timestamp
-    m_nonground_msg.header.stamp = msg->header.stamp;
-    m_ground_msg.header.stamp = msg->header.stamp;
+    m_nonground_msg.header.stamp = pcl_conversions::fromPCL(input->header.stamp);
+    m_ground_msg.header.stamp = pcl_conversions::fromPCL(input->header.stamp);
     // Add all points to aggregator
     // Iterate through the data, but skip intensity in case the point cloud does not have it.
     // For example:
@@ -181,21 +185,27 @@ RayGroundClassifierCloudNode::callback(const sensor_msgs::PointCloud2::Ptr& msg)
     bool8_t has_encountered_unknown_exception = false;
     bool8_t abort = false;
 
-    std::cout << "pointcloud size: " << (msg->data.size()/msg->point_step) << std::endl;
-    std::size_t point_step = msg->point_step;
-    for (std::size_t idx = 0U; idx < msg->data.size(); idx += point_step) {
+    // std::cout << "pointcloud size: " << (msg->data.size()/msg->point_step) << std::endl;
+    std::cout << "pointcloud size: " << input->points.size() << std::endl;
+    // std::size_t point_step = msg->point_step;
+    for (std::size_t idx = 0U; idx < input->points.size(); idx += 1) {
       if (abort) {
         continue;
       }
       try {
-        PointXYZIF * pt;
+        // PointXYZIF * pt;
         // TODO(c.ho) Fix below deviation after #2131 is in
         //lint -e{925, 9110} Need to convert pointers and use bit for external API NOLINT
-        pt = reinterpret_cast<PointXYZIF *>(&msg->data[idx]);
+        pcl::PointXYZI pt_msg = input->points[idx];
+        PointXYZIF* pt(new PointXYZIF());
+        pt->x = pt_msg.x;
+        pt->y = pt_msg.y;
+        pt->z = pt_msg.z;
+        pt->intensity = pt_msg.intensity;
         // don't bother inserting the points almost (0,0).
         // Too many of those makes the bin 0 overflow
-        if ((fabsf(pt->x) > std::numeric_limits<decltype(pt->x)>::epsilon()) ||
-          (fabsf(pt->y) > std::numeric_limits<decltype(pt->y)>::epsilon()))
+        if ((std::isfinite(pt->x) &&std::isfinite(pt->y)) && ((fabsf(pt->x) > std::numeric_limits<decltype(pt->x)>::epsilon()) ||
+          (fabsf(pt->y) > std::numeric_limits<decltype(pt->y)>::epsilon())))
         {
           if (!m_aggregator.insert(pt)) {
             m_aggregator.end_of_scan();
@@ -223,10 +233,6 @@ RayGroundClassifierCloudNode::callback(const sensor_msgs::PointCloud2::Ptr& msg)
         has_encountered_unknown_exception = true;
       }
     }
-
-
-    std::cout << "done insretion" << std::endl;
-    // return;
 
     // if abort, we skip all remaining the parallel work to be able to return/throw
     if (!abort) {

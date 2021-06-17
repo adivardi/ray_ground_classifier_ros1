@@ -100,7 +100,7 @@ struct PointXYZI
 using PointBlock = std::vector<PointXYZIF>;
 using PointPtrBlock = std::vector<const PointXYZIF *>;
 /// \brief Stores basic configuration information, does some simple validity checking
-static constexpr uint16_t POINT_BLOCK_CAPACITY = 2048U;
+static constexpr uint16_t POINT_BLOCK_CAPACITY = 512U;
 
 // TODO(yunus.caliskan): switch to std::void_t when C++17 is available
 /// \brief `std::void_t<> implementation

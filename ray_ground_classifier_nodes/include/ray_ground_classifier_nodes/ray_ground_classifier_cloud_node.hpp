@@ -30,6 +30,8 @@
 #include <tf2_ros/transform_listener.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <pcl_ros/transforms.h>
+#include <pcl_conversions/pcl_conversions.h>
+#include <pcl_ros/point_cloud.h>
 
 #include <memory>
 #include <string>
@@ -81,7 +83,7 @@ private:
   std::shared_ptr<ros::Publisher> m_ground_pub_ptr; //PointCloud2
   std::shared_ptr<ros::Publisher> m_nonground_pub_ptr; //PointCloud2
   /// \brief Read samples from the subscription
-  void callback(const sensor_msgs::PointCloud2::Ptr& msg);
+  void callback(const pcl::PointCloud<pcl::PointXYZI>::ConstPtr& msg);
   uint32_t m_ground_pc_idx;
   uint32_t m_nonground_pc_idx;
 
