@@ -80,7 +80,7 @@ RayGroundPointClassifier::PointLabel RayGroundPointClassifier::is_ground(const P
   }
 
   const float32_t dh_m = fabsf(height_m - m_prev_height_m);
-  const Interval_f range(m_config.m_min_height_thresh_m, m_config.m_max_global_height_thresh_m);
+  const Interval_f range(m_config.m_min_height_thresh_m, m_config.m_max_global_height_thresh_m);  // TODO sepeate m_max_global_height_thresh_m into its own param
   const auto dr_m_clamped = Interval_f::clamp_to(range, m_config.m_max_local_slope * dr_m);
   const bool8_t is_local = (dh_m < dr_m_clamped);
   const float32_t global_height_thresh_m =
@@ -94,12 +94,15 @@ RayGroundPointClassifier::PointLabel RayGroundPointClassifier::is_ground(const P
       // vertical structure, so nonground, need to retroactively annotate provisional gorund
       ret = PointLabel::RETRO_NONGROUND;
     } else {
+      // TODO this definitely causes missing points! but removing this also adds points beyond the median!
       // check global cone
-      ret = (fabsf(height_m - m_config.m_ground_z_m) < global_height_thresh_m) ?
-        PointLabel::GROUND :
-        (dr_m < m_config.m_max_provisional_ground_distance_m) ?
-        PointLabel::NONGROUND :
-        PointLabel::NONLOCAL_NONGROUND;
+      // ret = (fabsf(height_m - m_config.m_ground_z_m) < global_height_thresh_m) ?
+      //   PointLabel::GROUND :
+      //   (dr_m < m_config.m_max_provisional_ground_distance_m) ?
+      //   PointLabel::NONGROUND :
+      //   PointLabel::NONLOCAL_NONGROUND;
+        ret = (dr_m < m_config.m_max_provisional_ground_distance_m) ? PointLabel::NONGROUND : PointLabel::NONLOCAL_NONGROUND;
+        // ret =PointLabel::NONLOCAL_NONGROUND;
     }
   } else {
     const float32_t drg_m = (radius_m - m_prev_ground_radius_m);
@@ -116,10 +119,12 @@ RayGroundPointClassifier::PointLabel RayGroundPointClassifier::is_ground(const P
       // local in height, so nonground
       ret = PointLabel::NONGROUND;
     } else {
-      // global ground: provisionally ground
-      ret = ((fabsf(height_m - m_config.m_ground_z_m) < global_height_thresh_m)) ?
-        PointLabel::PROVISIONAL_GROUND :
-        PointLabel::NONGROUND;
+      // TODO this may cause missing points ?
+      // global ground: provisionally ground  // TODO if remove this, then need a way to redetect ground
+      // ret = ((fabsf(height_m - m_config.m_ground_z_m) < global_height_thresh_m)) ?
+      //   PointLabel::PROVISIONAL_GROUND :
+      //   PointLabel::NONGROUND;
+        ret = PointLabel::NONGROUND;
     }
   }
   // update state
