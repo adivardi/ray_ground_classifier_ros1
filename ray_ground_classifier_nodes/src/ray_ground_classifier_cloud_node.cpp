@@ -64,8 +64,8 @@ RayGroundClassifierCloudNode::RayGroundClassifierCloudNode(ros::NodeHandle& nh)
   //           "classifier.max_provisional_ground_distance_m").get<float32_t>())
   //       }),
   m_classifier(ray_ground_classifier::Config{
-          0.0, //0.58, //sensor_height_m How high the sensor is off the ground
-          15.0, // max_local_slope_deg Maximum permissible slope for two ground points within reclass_threshold
+          0.0, //0.58, //sensor_height_m How high the pointcloud frame center off the ground
+          10.0, // 15.0,// max_local_slope_deg Maximum permissible slope for two ground points within reclass_threshold
           5.7, // max_global_slope_deg Maximum permissible slope from base footprint of sensor
           70.0, // nonground_retro_thresh_deg How steep consecutive points need to be to retroactively annotate a point as nonground
           0.05, // min_height_thresh_m Local height threshold can be no less than this

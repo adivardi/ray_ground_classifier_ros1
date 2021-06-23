@@ -94,7 +94,7 @@ RayGroundPointClassifier::PointLabel RayGroundPointClassifier::is_ground(const P
       // vertical structure, so nonground, need to retroactively annotate provisional gorund
       ret = PointLabel::RETRO_NONGROUND;
     } else {
-      // TODO this definitely causes missing points! but removing this also adds points beyond the median!
+      // TODO this definitely causes missing points! but removing this also adds points beyond the median (actually not really, but does add a bit of far away pts!)
       // check global cone
       // ret = (fabsf(height_m - m_config.m_ground_z_m) < global_height_thresh_m) ?
       //   PointLabel::GROUND :
