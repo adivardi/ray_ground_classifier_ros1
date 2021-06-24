@@ -84,9 +84,9 @@ RayGroundClassifierCloudNode::RayGroundClassifierCloudNode(ros::NodeHandle& nh)
   //       }),
   m_aggregator(ray_ground_classifier::RayAggregator::Config{
          -3.14159, // min_ray_angle_rad
-        3.14159, // max_ray_angle_rad
-            0.001, // ray_width_rad
-           256 // min_ray_points
+          3.14159, // max_ray_angle_rad
+          0.0036, //  0.0036rad ~= 0.2deg // ray_width_rad
+          256 // min_ray_points   // TODO ???
         }),
 
   m_pcl_size(28800), //pcl_size
