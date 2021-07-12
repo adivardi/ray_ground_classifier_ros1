@@ -92,7 +92,7 @@ RayGroundClassifierCloudNode::RayGroundClassifierCloudNode(ros::NodeHandle& nh)
   m_pcl_size(28800), //pcl_size
   m_frame_id("base_link"),
   m_has_failed(false),
-  m_timeout(110), //cloud_timeout_ms
+  // m_timeout(110), //cloud_timeout_ms
   m_ground_pc_idx{0},
   m_nonground_pc_idx{0},
   tf_listener_{tf_buffer_}
@@ -125,9 +125,9 @@ RayGroundClassifierCloudNode::callback(const pcl::PointCloud<pcl::PointXYZI>::Co
   pcl::PointCloud<pcl::PointXYZI>::Ptr input(new pcl::PointCloud<pcl::PointXYZI>());
   pcl::copyPointCloud(*msg, *input);
 
-  PointXYZIF pt_tmp;
-  pt_tmp.id = static_cast<uint16_t>(PointXYZIF::END_OF_SCAN_ID);
-  const ray_ground_classifier::PointXYZIFR eos_pt{&pt_tmp};
+  // PointXYZIF pt_tmp;
+  // pt_tmp.id = static_cast<uint16_t>(PointXYZIF::END_OF_SCAN_ID);
+  // const ray_ground_classifier::PointXYZIFR eos_pt{&pt_tmp};
 
   // transform to m_frame_id
   if (input->header.frame_id != m_frame_id)

@@ -145,7 +145,6 @@ bool8_t RayAggregator::insert(const PointXYZIFR & pt)
     }
     if (ray.size() >= ray.capacity()) {
       throw std::runtime_error("RayAggregator: Ray capacity overrun! Use smaller bins. ray: " + std::to_string(idx) + ". size: " + std::to_string(ray.size()));
-      return true;
     }
     // insert point to ray, do some presorting
     ray.push_back(pt);

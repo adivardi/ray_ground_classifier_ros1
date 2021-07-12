@@ -78,7 +78,7 @@ private:
   // Basic stateful stuff, will get refactored after we have a proper state machine implementation
   bool8_t m_has_failed;
   // publishers and subscribers
-  const std::chrono::nanoseconds m_timeout;
+  // const std::chrono::nanoseconds m_timeout;
   ros::Subscriber m_raw_sub_ptr; //PointCloud2
   std::shared_ptr<ros::Publisher> m_ground_pub_ptr; //PointCloud2
   std::shared_ptr<ros::Publisher> m_nonground_pub_ptr; //PointCloud2
