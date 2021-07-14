@@ -47,6 +47,10 @@ public:
   /// \brief Copy constructor
   explicit RayGroundClassifier(const RayGroundClassifier & original);
 
+  // ********************* Partition m_sort_array (ray member stored in this class) into blocks *********************
+  // TODO adi this is all unused!  the entire part of using an internal ray is unused!!
+  // The only advantage of using the stored ray is that it will sort it using Autoware's Quicksort
+/*
   /// \brief Inserts a point into the internal datastructure, intended to be used with filter.
   ///        Points inserted sequentially should have the semantics of being a part of the same ray
   /// \param[in] pt The point to insert
@@ -63,15 +67,6 @@ public:
   /// \param[in] nonground_block The block that should hold the resulting nonground points
   /// \return false if provided output blocks could not fit ray
   bool8_t can_fit_result(
-    const PointPtrBlock & ground_block,
-    const PointPtrBlock & nonground_block) const;
-  /// \brief check if the provided output blocks can definitely fit the result of a partition
-  /// \param[in] ground_block The block that should hold the resulting ground points
-  /// \param[in] nonground_block The block that should hold the resulting nonground points
-  /// \param[in] ray The ray to be partitioned
-  /// \return false if provided output blocks could not fit ray
-  bool8_t can_fit_result(
-    const Ray & ray,
     const PointPtrBlock & ground_block,
     const PointPtrBlock & nonground_block) const;
 
@@ -102,6 +97,14 @@ public:
     const PointPtrBlock & raw_block,
     PointPtrBlock & ground_block,
     PointPtrBlock & nonground_block);
+*/
+  // ******************************** Partition a given ray into blocks ********************************
+  /// \brief check if the provided output blocks can definitely fit the result of a partition
+  /// \param[in] ground_block The block that should hold the resulting ground points
+  /// \param[in] nonground_block The block that should hold the resulting nonground points
+  /// \param[in] ray The ray to be partitioned
+  /// \return false if provided output blocks could not fit ray
+  bool8_t can_fit_result(const Ray & ray, const PointPtrBlock & ground_block, const PointPtrBlock & nonground_block) const;
 
   /// \brief Logic for making labels consistent throughout a single ray
   /// \param[in] ray Datastructure which holds a sorted ray
@@ -115,10 +118,17 @@ public:
     PointPtrBlock & nonground_block);
 
 private:
-  /// \brief Sorts internally stored ray
-  RAY_GROUND_CLASSIFIER_LOCAL void sort_ray();
   /// \brief Inserts point to a block
   RAY_GROUND_CLASSIFIER_LOCAL static void insert(PointPtrBlock & block, const PointXYZIF * pt);
+
+  /// actual ground filter
+  RayGroundPointClassifier m_point_classifier;
+
+  // ********************* Partition m_sort_array (ray member stored in this class) into blocks *********************
+  /*
+  /// \brief Sorts internally stored ray
+  RAY_GROUND_CLASSIFIER_LOCAL void sort_ray();
+
   /// \brief Logic for making labels consistent throughout a single ray, uses internal ray
   /// \param[inout] ground_block Gets appended with ground points, size is respected and modified
   /// \param[inout] nonground_block Gets appended with nonground points, size is respected and
@@ -132,9 +142,7 @@ private:
 
   /// Iterative quick sorter for rays
   autoware::common::algorithm::QuickSorter<Ray> m_ray_sorter;
-
-  /// actual ground filter
-  RayGroundPointClassifier m_point_classifier;
+*/
 };  // class RayGroundClassifier
 }  // namespace ray_ground_classifier
 }  // namespace filters

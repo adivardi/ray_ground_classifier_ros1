@@ -36,23 +36,23 @@ namespace filters
 {
 namespace ray_ground_classifier
 {
-
 ////////////////////////////////////////////////////////////////////////////////
 RayGroundClassifier::RayGroundClassifier(const Config & cfg)
-: m_sort_array(autoware::common::types::POINT_BLOCK_CAPACITY),
-  m_ray_sorter(autoware::common::types::POINT_BLOCK_CAPACITY),
+: //m_sort_array(autoware::common::types::POINT_BLOCK_CAPACITY),
+  //m_ray_sorter(autoware::common::types::POINT_BLOCK_CAPACITY),
   m_point_classifier(cfg)
 {
-  m_sort_array.clear();
+  //m_sort_array.clear();
 }
 ////////////////////////////////////////////////////////////////////////////////
 RayGroundClassifier::RayGroundClassifier(const RayGroundClassifier & original)
-: m_sort_array(original.m_sort_array),
-  m_ray_sorter(original.m_ray_sorter.capacity()),
+: //m_sort_array(original.m_sort_array),
+  //m_ray_sorter(original.m_ray_sorter.capacity()),
   m_point_classifier(original.m_point_classifier)
 {
-  m_sort_array.clear();
+  //m_sort_array.clear();
 }
+/*
 ////////////////////////////////////////////////////////////////////////////////
 void RayGroundClassifier::insert(const PointXYZIF * pt)
 {
@@ -65,15 +65,6 @@ void RayGroundClassifier::insert(const PointXYZIFR & pt)
     throw std::runtime_error("RayGroundClassifier: cannot insert into full array");
   }
   m_sort_array.push_back(pt);
-}
-////////////////////////////////////////////////////////////////////////////////
-bool8_t RayGroundClassifier::can_fit_result(
-  const Ray & ray,
-  const PointPtrBlock & ground_block,
-  const PointPtrBlock & nonground_block) const
-{
-  return (ray.size() + std::max(ground_block.size(), nonground_block.size())) <=
-         autoware::common::types::POINT_BLOCK_CAPACITY;
 }
 ////////////////////////////////////////////////////////////////////////////////
 bool8_t RayGroundClassifier::can_fit_result(
@@ -132,11 +123,7 @@ void RayGroundClassifier::sort_ray()
   // sort by radial distance
   m_ray_sorter.sort(m_sort_array.begin(), m_sort_array.end());
 }
-////////////////////////////////////////////////////////////////////////////////
-void RayGroundClassifier::insert(PointPtrBlock & block, const PointXYZIF * pt)
-{
-  block.push_back(pt);
-}
+
 ////////////////////////////////////////////////////////////////////////////////
 void RayGroundClassifier::segment_ray(PointPtrBlock & ground_block, PointPtrBlock & nonground_block)
 {
@@ -144,6 +131,22 @@ void RayGroundClassifier::segment_ray(PointPtrBlock & ground_block, PointPtrBloc
   // reset internal array
   m_sort_array.clear();  // capacity unchanged
 }
+*/
+////////////////////////////////////////////////////////////////////////////////
+void RayGroundClassifier::insert(PointPtrBlock & block, const PointXYZIF * pt)
+{
+  block.push_back(pt);
+}
+////////////////////////////////////////////////////////////////////////////////
+bool8_t RayGroundClassifier::can_fit_result(
+  const Ray & ray,
+  const PointPtrBlock & ground_block,
+  const PointPtrBlock & nonground_block) const
+{
+  return (ray.size() + std::max(ground_block.size(), nonground_block.size())) <=
+         autoware::common::types::POINT_BLOCK_CAPACITY;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 void RayGroundClassifier::partition(
   const Ray & ray,
